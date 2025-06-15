@@ -1,0 +1,7 @@
+{
+	"InstallScripts" : 
+	[
+		"C:/Nekhil/Projects/RobotArm/NeuralNetwork/build/cmake_install.cmake"
+	],
+	"Parallel" : false
+}

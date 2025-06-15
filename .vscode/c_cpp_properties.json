@@ -1,0 +1,29 @@
+{
+    "configurations": [
+        {
+            "name": "Win32",
+            "includePath": [
+                "${default}",
+                "${workspaceFolder}/**",
+                "${workspaceFolder}/Model",
+                "${workspaceFolder}/Model/Neuron",
+                "${workspaceFolder}/Model/Layer",
+                "${workspaceFolder}/Model/Network",
+                "${workspaceFolder}/Model/Operations",
+                "${workspaceFolder}/Model/Operations/Create",
+                "${workspaceFolder}/Model/Operations/Run"
+            ],
+            "defines": [
+                "_DEBUG",
+                "UNICODE",
+                "_UNICODE"
+            ],
+            "windowsSdkVersion": "10.0.22621.0",
+            "compilerPath": "cl.exe",
+            "cStandard": "c17",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "windows-msvc-x64"
+        }
+    ],
+    "version": 4
+}

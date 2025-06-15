@@ -1,0 +1,56 @@
+{
+  "version": "2.0.0",
+  "inputs": [
+    {
+      "id": "trainConfig",
+      "description": "Path to training config (e.g., train_config.json):",
+      "type": "promptString",
+      "default": "train_config.json"
+    },
+    {
+      "id": "runConfig",
+      "description": "Path to run config (e.g., run_config.json):",
+      "type": "promptString",
+      "default": "run_config.json"
+    },
+
+    {
+      "id": "inputs",
+      "description": "Space-Separated Inputs to Model",
+      "type": "promptString",
+      "default": "1 1 1"
+    },
+  ],
+  "tasks": [
+    {
+      "label": "Build Neural Network",
+      "type": "shell",
+      "command": "cmake",
+      "args": [
+        "--build",
+        "build"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Train Neural Network",
+      "type": "shell",
+      "command": "./neural_net --config ${input:trainConfig} --train",
+      "dependsOn": "Build Neural Network",
+      "group": "none",
+      "problemMatcher": []
+    },
+    {
+      "label": "Run Neural Network Inference",
+      "type": "shell",
+      "command": "./neural_net --config ${input:runConfig} --run --input ${input:inputs}",
+      "dependsOn": "Build Neural Network",
+      "group": "none",
+      "problemMatcher": []
+    }
+  ]
+}

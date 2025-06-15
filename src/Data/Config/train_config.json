@@ -1,0 +1,36 @@
+{
+  "type": "training",
+  "data": {
+    "type": "CSV",
+    "path": "src/Data/Training/abalone_copy.csv"
+  },
+  "inputs": {
+    "count": 8,
+    "names": ["LongestShell", "Diameter", "Height", "WholeWeight", "ShuckedWeight", "VisceraWeight", "ShellWeight", "Rings"]
+  },
+  "outputs": {
+    "count": 1,
+    "names": ["Type"]
+  },
+  "network": {
+    "layers": [8, 16, 16, 1],
+    "activation": {
+      "hidden": "RELU",
+      "output": "SIGMOID"
+    },
+    "training": {
+      "epochs": 200,
+      "learning_rate": 1.5
+    }
+  },
+  "build": {
+    "network": {
+      "type": "CSV",
+      "path": "src/Data/Network"
+    },
+    "runConfig": {
+      "type": "CSV",
+      "path": "src/Data/Config"
+    }
+  }
+}

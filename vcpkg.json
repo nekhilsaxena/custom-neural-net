@@ -1,0 +1,22 @@
+{
+  "name": "mynn",
+  "version": "0.1.0",
+  "dependencies": [
+    {
+      "name": "imgui",
+      "features": ["glfw-binding", "opengl3-binding"]
+    },
+    {
+      "name" : "vcpkg-cmake",
+      "host" : true
+    },
+    {
+      "name" : "vcpkg-cmake-config",
+      "host" : true
+    },
+    "implot",
+    "glfw3",
+    "nlohmann-json",
+    "glad"
+  ]
+}

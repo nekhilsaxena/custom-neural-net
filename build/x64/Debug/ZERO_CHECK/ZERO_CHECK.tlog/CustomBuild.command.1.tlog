@@ -1,0 +1,10 @@
+^C:\NEKHIL\PROJECTS\ROBOTARM\NEURALNETWORK\BUILD\CMAKEFILES\D7D855FB74A89BB2E464324F4E471E8A\GENERATE.STAMP.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Nekhil/Projects/RobotArm/NeuralNetwork -BC:/Nekhil/Projects/RobotArm/NeuralNetwork/build --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file C:/Nekhil/Projects/RobotArm/NeuralNetwork/build/NeuralNetwork.sln
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
