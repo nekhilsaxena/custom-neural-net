@@ -12,18 +12,13 @@ class Network
 {
 private:
      std::vector<Layer> layers;
-     std::vector<int> layerSizes;
 
 public:
-     Network(const std::vector<int> &layerSizes,
-             Neuron::Activation::Type hiddenActivation = Neuron::Activation::RELU,
-             Neuron::Activation::Type outputActivation = Neuron::Activation::LINEAR);
+     Network(const std::vector<int> &layerSizes, const std::vector<Neuron::Activation::Type> &activations);
 
      std::vector<double> forward(const std::vector<double> &inputs);
      void saveWeights(const std::string &filename) const;
      void loadWeights(const std::string &filename);
-
-     std::vector<int> getLayerSizes();
 
      // Backpropagation
      void backward(const std::vector<double> &expected, double learningRate);

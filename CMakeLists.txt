@@ -1,35 +1,27 @@
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 3.15)
 project(NeuralNetwork)
 
-# Enable C++17
 set(CMAKE_CXX_STANDARD 17)
 
-# Tell CMake where vcpkg is
-if(DEFINED ENV{VCPKG_ROOT})
-    set(CMAKE_TOOLCHAIN_FILE "$ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
-        CACHE STRING "Vcpkg toolchain file")
-endif()
+# Include directories
+include_directories(
+    ${CMAKE_SOURCE_DIR}
+    ${CMAKE_SOURCE_DIR}/src/Model
+    ${CMAKE_SOURCE_DIR}/src/Model/Components/Network
+    ${CMAKE_SOURCE_DIR}/src/Model/Components/Layer
+    ${CMAKE_SOURCE_DIR}/src/Model/Components/Neuron
+)
 
-# Add your source files
-file(GLOB_RECURSE SOURCES
-    src/*.cpp
-    src/*.h
+# Source files for the main target
+set(SOURCES
+    src/main.cpp
+    src/Model/Model.cpp
+    src/Model/Components/Network/Network.cpp
+    src/Model/Components/Layer/Layer.cpp
+    src/Model/Components/Neuron/Neuron.cpp
 )
 
 add_executable(NeuralNetwork ${SOURCES})
 
-# Required packages
-find_package(imgui CONFIG REQUIRED)
-find_package(implot CONFIG REQUIRED)
-find_package(glfw3 CONFIG REQUIRED)
-find_package(glad CONFIG REQUIRED)
-
-# Link packages to your project
-target_link_libraries(NeuralNetwork
-    PRIVATE
-        imgui::imgui
-        implot::implot
-        glfw
-        opengl32
-        glad::glad
-)
+# Add test subdirectory
+add_subdirectory(test)

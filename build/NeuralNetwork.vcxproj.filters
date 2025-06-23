@@ -1,7 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="C:\Nekhil\Projects\RobotArm\NeuralNetwork\src\Model\Components\Layer\Layer.cpp">
+    <ClCompile Include="C:\Nekhil\Projects\RobotArm\NeuralNetwork\src\main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Nekhil\Projects\RobotArm\NeuralNetwork\src\Model\Model.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="C:\Nekhil\Projects\RobotArm\NeuralNetwork\src\Model\Components\Network\Network.cpp">
@@ -10,58 +13,11 @@
     <ClCompile Include="C:\Nekhil\Projects\RobotArm\NeuralNetwork\src\Model\Components\Neuron\Neuron.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Nekhil\Projects\RobotArm\NeuralNetwork\src\Model\Operations\create.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="C:\Nekhil\Projects\RobotArm\NeuralNetwork\src\Model\Operations\run.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="C:\Nekhil\Projects\RobotArm\NeuralNetwork\src\Model\Utils\Cost.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="C:\Nekhil\Projects\RobotArm\NeuralNetwork\src\Model\Utils\ReadCSV.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="C:\Nekhil\Projects\RobotArm\NeuralNetwork\src\Model\Utils\ReadRawCSV.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="C:\Nekhil\Projects\RobotArm\NeuralNetwork\src\Model\Utils\computeStatistics.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="C:\Nekhil\Projects\RobotArm\NeuralNetwork\src\Model\Visualization\Visualization.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="C:\Nekhil\Projects\RobotArm\NeuralNetwork\src\main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="C:\Nekhil\Projects\RobotArm\NeuralNetwork\src\Model\Components\Layer\Layer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="C:\Nekhil\Projects\RobotArm\NeuralNetwork\src\Model\Components\Network\Network.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="C:\Nekhil\Projects\RobotArm\NeuralNetwork\src\Model\Components\Neuron\Neuron.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="C:\Nekhil\Projects\RobotArm\NeuralNetwork\src\Model\Operations\Operations.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="C:\Nekhil\Projects\RobotArm\NeuralNetwork\src\Model\Utils\Utils.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="C:\Nekhil\Projects\RobotArm\NeuralNetwork\src\Model\Visualization\Visualization.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="C:\Nekhil\Projects\RobotArm\NeuralNetwork\CMakeLists.txt" />
   </ItemGroup>
   <ItemGroup>
-    <Filter Include="Header Files">
-      <UniqueIdentifier>{E92A828F-8C1C-3A32-96A2-67C02D3C9767}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files">
       <UniqueIdentifier>{B8B2E26D-B6FF-3739-B057-4728B8072165}</UniqueIdentifier>
     </Filter>

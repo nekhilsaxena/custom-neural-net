@@ -6,25 +6,31 @@
 #include <stdexcept>
 #include <fstream>
 #include <numeric>
+#include <random>
 
 // Constructor with Xavier/Glorot initialization
 Neuron::Neuron(int numInputs, bool isOutputNeuron, Activation::Type activation)
     : isOutputNeuron(isOutputNeuron), activation_(activation)
 {
      double range = sqrt(6.0 / (numInputs + 1)); // Xavier/Glorot for ReLU
+
+     std::random_device rd;
+     std::mt19937 gen(rd());
+     std::uniform_real_distribution<> dis(-range, range);
+
      for (int i = 0; i < numInputs; ++i)
      {
-          weights.push_back(((double)rand() / RAND_MAX) * 2 * range - range);
+          weights.push_back(dis(gen));
      }
-     bias = 0.0; // Initialize bias to 0
+     bias = 0.0;
 }
 
 void Neuron::setActivation(Activation::Type type)
 {
-     activation_ = Activation(type);
+     activation_ = type;
 }
 
-Neuron::Activation Neuron::getActivation() const
+Neuron::Activation::Type Neuron::getActivation() const
 {
      return activation_;
 }
@@ -57,13 +63,16 @@ double Neuron::sigmoidDerivative(double x)
 // Activation logic
 double Neuron::activate(double x)
 {
-     if (isOutputNeuron)
+     switch (activation_)
      {
-          return x; // Linear for regression
-     }
-     else
-     {
-          return relu(x); // ReLU for hidden layers
+     case Activation::RELU:
+          return relu(x);
+     case Activation::SIGMOID:
+          return sigmoid(x);
+     case Activation::LINEAR:
+          return x; // Linear output for regression
+     default:
+          throw std::runtime_error("Unsupported activation function");
      }
 }
 
@@ -86,11 +95,16 @@ void Neuron::computeOutputDelta(double target)
 {
      if (isOutputNeuron)
      {
-          // For regression (linear output)
-          delta = output - target;
-
-          // For classification (uncomment if using sigmoid output):
-          // delta = (output - target) * sigmoidDerivative(output);
+          if (activation_ == Activation::SIGMOID)
+          {
+               // For classification (using sigmoid)
+               delta = (output - target) * sigmoidDerivative(output);
+          }
+          else
+          {
+               // For regression (linear output)
+               delta = output - target;
+          }
      }
 }
 
@@ -127,10 +141,10 @@ void Neuron::saveWeights(std::ofstream &file, size_t layerIndex, size_t neuronIn
 }
 
 std::vector<double> Neuron::getWeights() const { return weights; }
+
 double Neuron::getBias() const { return bias; }
 
 void Neuron::setWeights(std::vector<double> newWeights) { weights = newWeights; }
-void Neuron::setBias(double newBias) { bias = newBias; }
 
 void Neuron::setAll(const std::vector<double> &weightsWithoutBias, double biasVal)
 {

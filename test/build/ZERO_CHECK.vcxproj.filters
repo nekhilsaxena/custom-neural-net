@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="C:\Nekhil\Projects\RobotArm\NeuralNetwork\test\build\CMakeFiles\77170fa3480773d660fc0c97d2eec55c\generate.stamp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{10459F41-3364-3329-A6CA-D6638D425167}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

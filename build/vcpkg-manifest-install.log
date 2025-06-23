@@ -8,8 +8,8 @@ The following packages are already installed:
     implot:x64-windows@0.16 -- git+https://github.com/microsoft/vcpkg@688b48b9fc371ad59a57d92b05d7fd3699c4a57e
     nlohmann-json:x64-windows@3.12.0 -- git+https://github.com/microsoft/vcpkg@060c829772d52e920fee94cf84755031c61e3b67
   * opengl-registry:x64-windows@2024-02-10#1 -- git+https://github.com/microsoft/vcpkg@22f7aa58ee78c9f0db904b6251e9265f2be26f9d
-  * vcpkg-cmake:x64-windows@2024-04-23 -- git+https://github.com/microsoft/vcpkg@e74aa1e8f93278a8e71372f1fa08c3df420eb840
-  * vcpkg-cmake-config:x64-windows@2024-05-23 -- git+https://github.com/microsoft/vcpkg@97a63e4bc1a17422ffe4eff71da53b4b561a7841
+    vcpkg-cmake:x64-windows@2024-04-23 -- git+https://github.com/microsoft/vcpkg@e74aa1e8f93278a8e71372f1fa08c3df420eb840
+    vcpkg-cmake-config:x64-windows@2024-05-23 -- git+https://github.com/microsoft/vcpkg@97a63e4bc1a17422ffe4eff71da53b4b561a7841
 glad provides CMake targets:
 
   # this is heuristically generated, and may not be correct
@@ -52,4 +52,4 @@ For more information, see the docs here:
     
     https://json.nlohmann.me/api/macros/json_use_implicit_conversions/
 
-All requested installations completed successfully in: 1.69 ms
+All requested installations completed successfully in: 1.73 ms

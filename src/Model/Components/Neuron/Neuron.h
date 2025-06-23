@@ -57,9 +57,8 @@ public:
      Neuron(int numInputs, bool isOutputNeuron, Activation::Type activation = Activation::RELU);
 
      void setActivation(Activation::Type type);
-     Activation getActivation() const;
 
-     Activation activation_;
+     Activation::Type activation_;
 
      // Activation functions
      static double relu(double x);
@@ -84,5 +83,5 @@ public:
      std::vector<double> getWeights() const;
      double getBias() const;
      void setWeights(std::vector<double> newWeights);
-     void setBias(double newBias);
+     Activation::Type getActivation() const;
 };

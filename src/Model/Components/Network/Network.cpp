@@ -6,17 +6,16 @@
 #include <sstream>
 #include <functional>
 
-Network::Network(const std::vector<int> &layerSizes,
-                 Neuron::Activation::Type hiddenActivation,
-                 Neuron::Activation::Type outputActivation)
+Network::Network(const std::vector<int> &layerSizes, const std::vector<Neuron::Activation::Type> &activations)
 {
-     this->layerSizes = layerSizes;
+     if (layerSizes.size() != activations.size())
+          throw std::invalid_argument("Each layer must have an associated activation function.");
 
+     // Create layers with specific activations
      for (size_t i = 1; i < layerSizes.size(); ++i)
      {
           bool isOutputLayer = (i == layerSizes.size() - 1);
-          auto activation = isOutputLayer ? outputActivation : hiddenActivation;
-          layers.emplace_back(layerSizes[i], layerSizes[i - 1], isOutputLayer, activation);
+          layers.emplace_back(layerSizes[i], layerSizes[i - 1], isOutputLayer, activations[i]); // assume addLayer exists
      }
 }
 
@@ -63,7 +62,6 @@ void Network::loadWeights(const std::string &filename)
      }
 
      layers.clear();
-     layerSizes.clear();
 
      while (std::getline(file, line))
      {
@@ -113,11 +111,6 @@ void Network::loadWeights(const std::string &filename)
                std::cout << w << " ";
           std::cout << "\n  Bias: " << bias << "\n";
      }
-
-     // Reconstruct layerSizes from layers
-     layerSizes.push_back(layers.front().getNeuron(0).getWeights().size()); // input size
-     for (const Layer &layer : layers)
-          layerSizes.push_back(layer.size());
 
      if (!layers.empty())
      {
@@ -181,7 +174,7 @@ void Network::backward(const std::vector<double> &expected, double learningRate)
                {
                     n.weights[w] -= learningRate * n.delta * inputs[w];
                }
-               n.setBias(n.getBias() - learningRate * n.delta);
+               n.bias = n.getBias() - learningRate * n.delta;
           }
      }
 }
@@ -221,9 +214,4 @@ void Network::train(const std::vector<std::vector<double>> &inputs,
           if (onEpochEnd)
                onEpochEnd(epoch, float(averageCost));
      }
-}
-
-std::vector<int> Network::getLayerSizes()
-{
-     return layerSizes;
 }
