@@ -1,53 +1,45 @@
 #ifndef LAYER_H
 #define LAYER_H
 
-#include "../Neuron/Neuron.h"
 #include <vector>
-#include <cstdlib>
+#include <string>
 #include <fstream>
 
 class Layer
 {
-private:
-     std::vector<Neuron> neurons;
+protected:
+     std::vector<double> lastInput;
+     std::vector<double> lastOutput;
+     bool isTrainable;
 
 public:
-     // Constructor to initialize neurons
-     Layer(int numNeurons, int numInputsPerNeuron, bool isOutputLayer, Neuron::Activation::Type activation);
+     virtual ~Layer() = default;
 
      // Forward pass
-     std::vector<double> forward(const std::vector<double> &inputs);
+     virtual std::vector<double> forward(const std::vector<double> &inputs) = 0;
 
-     // Save weights of neurons to file
-     void saveWeights(std::ofstream &file, size_t layerIndex) const;
+     // Backward pass
+     virtual std::vector<double> backward(const std::vector<double> &gradients)
+     {
+          return gradients;
+     }
 
-     // Getters for neurons
-     std::vector<Neuron> &getNeurons();
-     const std::vector<Neuron> &getNeurons() const;
+     // Update weights
+     virtual void updateWeights(double learningRate) {}
 
-     // Get a specific neuron
-     Neuron &getNeuron(int index);
-     const Neuron &getNeuron(int index) const;
+     // Serialization
+     virtual void save(std::ofstream &file) const = 0;
+     virtual void load(std::ifstream &file) = 0;
 
-     // Resize the layer by adding neurons
-     void resizeLayer(int neuronIndex, Neuron neuron);
-     size_t size() const;
-     void addNeuron(const Neuron &neuron);
+     // Layer info
+     virtual std::string getType() const = 0;
+     virtual size_t getOutputSize() const = 0;
+     virtual size_t getInputSize() const = 0;
 
-     // Get the outputs of all neurons in the layer
-     std::vector<double> getOutputs() const;
-
-     // Backpropagation methods
-     std::vector<double> lastInput; // Last inputs to this layer
-
-     // Compute deltas for output layer neurons
-     void computeDeltas(const std::vector<double> &targets);
-
-     // Compute deltas for hidden layer neurons
-     void computeDeltas(const Layer &nextLayer);
-
-     // Update weights of all neurons in the layer
-     void updateWeights(const std::vector<double> &inputs, double learningRate);
+     // Training control
+     bool isTrainableLayer() const { return isTrainable; }
+     void setIsTrainableLayer(bool trainable) { isTrainable = trainable; }
+     const std::vector<double> &getLastOutput() const { return lastOutput; }
 };
 
 #endif

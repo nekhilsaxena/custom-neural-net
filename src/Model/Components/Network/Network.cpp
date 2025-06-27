@@ -1,127 +1,134 @@
 #include "Network.h"
 #include <iostream>
 #include <stdexcept>
-#include <cstdlib>
 #include <fstream>
 #include <sstream>
 #include <functional>
+#include <memory>
 
-Network::Network(const std::vector<int> &layerSizes, const std::vector<Neuron::Activation::Type> &activations)
+void Network::add(LayerType type,
+                  int neuronCount,
+                  Neuron::Activation::Type activation,
+                  double dropoutRate,
+                  bool isOutputLayer)
 {
-     if (layerSizes.size() != activations.size())
-          throw std::invalid_argument("Each layer must have an associated activation function.");
-
-     // Create layers with specific activations
-     for (size_t i = 1; i < layerSizes.size(); ++i)
+     switch (type)
      {
-          bool isOutputLayer = (i == layerSizes.size() - 1);
-          layers.emplace_back(layerSizes[i], layerSizes[i - 1], isOutputLayer, activations[i]); // assume addLayer exists
+     case LayerType::DENSE:
+     {
+          if (neuronCount <= 0)
+          {
+               throw std::invalid_argument("Dense layer must have positive neuron count");
+          }
+          if (nextLayerInputSize == 0 && !layers.empty())
+          {
+               nextLayerInputSize = layers.back()->getOutputSize();
+          }
+          layers.push_back(std::make_unique<Dense>(
+              neuronCount,
+              nextLayerInputSize,
+              activation,
+              isOutputLayer));
+          nextLayerInputSize = neuronCount;
+          break;
+     }
+     case LayerType::DROPOUT:
+     {
+          if (dropoutRate <= 0.0 || dropoutRate >= 1.0)
+          {
+               throw std::invalid_argument("Dropout rate must be between 0 and 1");
+          }
+          if (layers.empty())
+          {
+               throw std::logic_error("Cannot add dropout layer as first layer");
+          }
+          layers.push_back(std::make_unique<Dropout>(dropoutRate));
+          // Input size remains the same for next layer
+          break;
+     }
+     default:
+          throw std::invalid_argument("Unknown layer type");
      }
 }
 
 std::vector<double> Network::forward(const std::vector<double> &inputs)
 {
      std::vector<double> result = inputs;
+
      for (auto &layer : layers)
      {
-          result = layer.forward(result);
+          result = layer->forward(result);
      }
+
      return result;
 }
 
-void Network::saveWeights(const std::string &filename) const
+void Network::saveWeights(const std::string &filename)
 {
      std::ofstream file(filename);
      if (!file.is_open())
+     {
           throw std::runtime_error("Unable to open file to save weights.");
+     }
 
-     file << "Layer,Neuron";
+     // Save network architecture first
+     file << "Network Architecture:\n";
+     for (const auto &layer : layers)
+     {
+          file << layer->getType() << " "
+               << layer->getInputSize() << " "
+               << layer->getOutputSize() << "\n";
+     }
+     file << "Weights:\n";
 
-     size_t maxWeights = layers.front().getNeuron(0).getWeights().size();
-     for (size_t i = 1; i <= maxWeights; ++i)
-          file << ",W" << i;
-     file << ",Bias\n";
-
+     // Save weights for trainable layers
      for (size_t layerIdx = 0; layerIdx < layers.size(); ++layerIdx)
-          layers[layerIdx].saveWeights(file, layerIdx);
+     {
+          if (layers[layerIdx]->isTrainableLayer())
+          {
+               layers[layerIdx]->save(file);
+          }
+     }
 }
 
 void Network::loadWeights(const std::string &filename)
 {
      std::ifstream file(filename);
      if (!file)
-          throw std::runtime_error("Failed to open weights file: " + filename);
-
-     std::string line;
-
-     // Skip header if present
-     if (std::getline(file, line))
      {
-          if (line.rfind("Layer", 0) != 0)
-               file.seekg(0);
+          throw std::runtime_error("Failed to open weights file: " + filename);
      }
 
-     layers.clear();
+     std::string line;
+     bool readingWeights = false;
+     size_t layerIdx = 0;
 
      while (std::getline(file, line))
      {
-          std::stringstream ss(line);
-          std::string value;
+          if (line.empty())
+               continue;
 
-          std::getline(ss, value, ',');
-          int layerIndex = std::stoi(value);
-          std::getline(ss, value, ',');
-          int neuronIndex = std::stoi(value);
-
-          std::vector<double> numbers;
-          while (std::getline(ss, value, ','))
-               numbers.push_back(std::stod(value));
-
-          if (numbers.empty())
-               throw std::runtime_error("No weights in row.");
-
-          std::vector<double> weights(numbers.begin(), numbers.end() - 1);
-          double bias = numbers.back();
-          size_t numInputs = weights.size();
-
-          // Create layers if they don’t exist
-          while (layers.size() <= static_cast<size_t>(layerIndex))
+          if (line == "Weights:")
           {
-               size_t inputSize = (layerIndex == 0)
-                                      ? numInputs
-                                      : layers[layerIndex - 1].size();
-
-               layers.emplace_back(0, int(inputSize), false, Neuron::Activation::SIGMOID);
+               readingWeights = true;
+               continue;
           }
 
-          Layer &layer = layers[layerIndex];
+          if (!readingWeights)
+               continue; // Skip architecture info for now
 
-          // Add neurons if needed
-          while (layer.size() <= static_cast<size_t>(neuronIndex))
+          // Only load weights for trainable layers
+          while (layerIdx < layers.size() && !layers[layerIdx]->isTrainableLayer())
           {
-               layer.addNeuron(Neuron(numInputs, false)); // isOutput will be set later
+               layerIdx++;
           }
 
-          Neuron &neuron = layer.getNeuron(neuronIndex);
-          neuron.setAll(weights, bias);
-
-          std::cout << "Layer " << layerIndex << ", Neuron " << neuronIndex << ":\n";
-          std::cout << "  Weights: ";
-          for (double w : weights)
-               std::cout << w << " ";
-          std::cout << "\n  Bias: " << bias << "\n";
-     }
-
-     if (!layers.empty())
-     {
-          Layer &outputLayer = layers.back();
-          for (Neuron &n : outputLayer.getNeurons())
+          if (layerIdx < layers.size())
           {
-               n.isOutputNeuron = true;
+               layers[layerIdx]->load(file);
+               layerIdx++;
           }
      }
-
-     std::cout << "\n  ****Weights Have Been Loaded!****" << "\n";
 }
 
 void Network::backward(const std::vector<double> &expected, double learningRate)
@@ -129,52 +136,29 @@ void Network::backward(const std::vector<double> &expected, double learningRate)
      if (layers.empty())
           return;
 
-     // --- 1. Output layer error ---
-     Layer &outputLayer = layers.back();
-     for (size_t i = 0; i < outputLayer.size(); ++i)
+     // Start with output gradient
+     std::vector<double> gradient = expected;
+
+     // Backward pass through layers in reverse order
+     for (int i = layers.size() - 1; i >= 0; --i)
      {
-          Neuron &n = outputLayer.getNeuron(i);
-          double error = n.output - expected[i];
-
-          // Derivative depends on activation:
-          n.delta = error * (n.isOutputNeuron ? n.sigmoidDerivative(n.output) : 1.0);
-     }
-
-     // --- 2. Hidden layers (backward pass) ---
-     for (int l = layers.size() - 2; l >= 0; --l)
-     { // From second-last to first
-          Layer &currentLayer = layers[l];
-          Layer &nextLayer = layers[l + 1];
-
-          for (size_t i = 0; i < currentLayer.size(); ++i)
+          if (layers[i]->isTrainableLayer())
           {
-               Neuron &n = currentLayer.getNeuron(i);
-               double sum = 0.0;
-
-               // Sum weighted errors from next layer
-               for (size_t j = 0; j < nextLayer.size(); ++j)
-               {
-                    sum += nextLayer.getNeuron(j).weights[i] * nextLayer.getNeuron(j).delta;
-               }
-
-               // ReLU derivative for hidden layers
-               n.delta = sum * n.reluDerivative(n.output);
+               gradient = layers[i]->backward(gradient);
+          }
+          else
+          {
+               // For non-trainable layers like dropout, just pass through
+               gradient = layers[i]->backward(gradient);
           }
      }
 
-     // --- 3. Update weights and biases ---
-     for (size_t l = 0; l < layers.size(); ++l)
+     // Update weights for trainable layers
+     for (auto &layer : layers)
      {
-          Layer &layer = layers[l];
-          const std::vector<double> &inputs = (l == 0) ? layer.lastInput : layers[l - 1].getOutputs();
-
-          for (Neuron &n : layer.getNeurons())
+          if (layer->isTrainableLayer())
           {
-               for (size_t w = 0; w < n.weights.size(); ++w)
-               {
-                    n.weights[w] -= learningRate * n.delta * inputs[w];
-               }
-               n.bias = n.getBias() - learningRate * n.delta;
+               layer->updateWeights(learningRate);
           }
      }
 }
@@ -185,7 +169,9 @@ void Network::train(const std::vector<std::vector<double>> &inputs,
                     std::function<void(float, float)> onEpochEnd)
 {
      if (inputs.size() != targets.size())
+     {
           throw std::invalid_argument("Number of input samples must match number of target samples.");
+     }
 
      for (int epoch = 0; epoch < epochs; ++epoch)
      {
@@ -193,25 +179,40 @@ void Network::train(const std::vector<std::vector<double>> &inputs,
 
           for (size_t i = 0; i < inputs.size(); ++i)
           {
-               // 1. Forward pass
+               // Forward pass
                std::vector<double> prediction = forward(inputs[i]);
 
-               // 2. Compute loss
+               // Compute loss
                for (size_t j = 0; j < prediction.size(); ++j)
                {
                     double error = prediction[j] - targets[i][j];
                     totalCost += error * error;
                }
 
-               // 3. Backward pass
+               // Backward pass
                backward(targets[i], learningRate);
           }
 
           double averageCost = totalCost / inputs.size();
           if (verbose)
+          {
                std::cout << "Epoch " << epoch + 1 << ", Cost: " << averageCost << "\n";
+          }
 
           if (onEpochEnd)
+          {
                onEpochEnd(epoch, float(averageCost));
+          }
+     }
+}
+
+void Network::setTrainingMode(bool training)
+{
+     for (auto &layer : layers)
+     {
+          if (auto dropout = dynamic_cast<Dropout *>(layer.get()))
+          {
+               dropout->setTraining(training);
+          }
      }
 }

@@ -7,16 +7,15 @@ int main()
 {
      try
      {
-          // Create the model
           Model model;
 
-          // Add layers: 4 input neurons, two hidden layers, and 1 output neuron
-          model.add(4, Neuron::Activation::RELU);   // Input layer
-          model.add(8, Neuron::Activation::RELU);   // Hidden layer
-          model.add(1, Neuron::Activation::LINEAR); // Output layer
+          // Add layers (dropout only after first layer)
+          model.add(10, Neuron::Activation::RELU);      // Input layer
+          model.add(10, Neuron::Activation::RELU, 0.2); // Hidden layer with dropout
+          model.add(1, Neuron::Activation::SIGMOID);    // Output layer
 
           // Build the network
-          model.build();
+          model.build(4);
 
           // Define sample input and output data
           std::vector<std::vector<double>> inputs = {
@@ -32,14 +31,14 @@ int main()
               22.0f};
 
           // Train the model
-          model.train(inputs, outputs, 200, 1.1f);
+          model.train(inputs, outputs, 2000, 3.6f);
 
           // Run a prediction
           std::vector<double> testInput = {5.0f, 6.0f, 7.0f, 8.0f};
           std::vector<double> prediction = model.predict(testInput);
 
           std::vector<double> testInput2 = {0, 0, 0, 0};
-          std::vector<double> prediction2 = model.predict(testInput);
+          std::vector<double> prediction2 = model.predict(testInput2);
 
           std::cout << "Prediction: ";
           for (double val : prediction)

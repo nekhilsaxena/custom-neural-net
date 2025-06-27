@@ -10,7 +10,10 @@
     <ClCompile Include="C:\Nekhil\Projects\RobotArm\NeuralNetwork\src\Model\Components\Network\Network.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Nekhil\Projects\RobotArm\NeuralNetwork\src\Model\Components\Layer\Layer.cpp">
+    <ClCompile Include="C:\Nekhil\Projects\RobotArm\NeuralNetwork\src\Model\Components\Layer\Dense\Dense.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Nekhil\Projects\RobotArm\NeuralNetwork\src\Model\Components\Layer\Dropout\Dropout.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="C:\Nekhil\Projects\RobotArm\NeuralNetwork\src\Model\Components\Neuron\Neuron.cpp">

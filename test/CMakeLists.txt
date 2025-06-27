@@ -7,7 +7,9 @@ set(CMAKE_CXX_STANDARD 17)
 include_directories(
     ${CMAKE_SOURCE_DIR}/../src/Model
     ${CMAKE_SOURCE_DIR}/../src/Model/Components/Network
-    ${CMAKE_SOURCE_DIR}/src/Model/Components/Layer
+    # ${CMAKE_SOURCE_DIR}/src/Model/Components/Layer
+    ${CMAKE_SOURCE_DIR}/src/Model/Components/Layer/Dense
+    ${CMAKE_SOURCE_DIR}/src/Model/Components/Layer/Dropout
     ${CMAKE_SOURCE_DIR}/../src/Model/Components/Neuron
 )
 
@@ -16,7 +18,8 @@ set(SOURCES
     main.cpp
     ../src/Model/Model.cpp
     ../src/Model/Components/Network/Network.cpp
-    ../src/Model/Components/Layer/Layer.cpp
+    ../src/Model/Components/Layer/Dense/Dense.cpp
+    ../src/Model/Components/Layer/Dropout/Dropout.cpp
     ../src/Model/Components/Neuron/Neuron.cpp
 )
 
