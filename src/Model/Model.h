@@ -1,7 +1,7 @@
 #ifndef MODEL_H
 #define MODEL_H
 
-#include "Network.h"
+#include "./Components/Network/Network.h"
 #include <vector>
 #include <memory>
 #include <stdexcept>
@@ -36,7 +36,6 @@ private:
           int units;
           Neuron::Activation::Type activation;
           double dropoutRate;
-          bool isOutput;
      };
 
      std::unique_ptr<Network> network;

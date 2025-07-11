@@ -1,59 +1,185 @@
 #include "../src/Model/Model.h"
 #include "../src/Model/Components/Neuron/Neuron.h"
-
 #include <iostream>
+#include <fstream>
+#include <sstream>
+#include <vector>
+#include <string>
+#include <stdexcept>
 
-int main()
+// Function to read CSV file and return input and output data
+std::pair<std::vector<std::vector<double>>, std::vector<double>> readCSV(const std::string &filename,
+                                                                         int numInputs,
+                                                                         int outputCol = -1)
+{
+     std::ifstream file(filename);
+     if (!file.is_open())
+     {
+          throw std::runtime_error("Could not open file: " + filename);
+     }
+
+     std::vector<std::vector<double>> inputs;
+     std::vector<double> outputs;
+     std::string line, value;
+
+     // Read header if exists (and skip it)
+     std::getline(file, line);
+
+     while (std::getline(file, line))
+     {
+          std::stringstream ss(line);
+          std::vector<double> row;
+          int col = 0;
+          double outputVal = 0.0;
+
+          while (std::getline(ss, value, ','))
+          {
+               try
+               {
+                    double num = std::stod(value);
+                    if (outputCol == -1)
+                    {
+                         // If output column not specified, last column is output
+                         if (col < numInputs)
+                         {
+                              row.push_back(num);
+                         }
+                         else if (col == numInputs)
+                         {
+                              outputVal = num;
+                         }
+                    }
+                    else
+                    {
+                         // Specific output column case
+                         if (col == outputCol)
+                         {
+                              outputVal = num;
+                         }
+                         else if (row.size() < numInputs)
+                         {
+                              row.push_back(num);
+                         }
+                    }
+                    col++;
+               }
+               catch (const std::exception &e)
+               {
+                    throw std::runtime_error("Error parsing value in CSV: " + value);
+               }
+          }
+
+          if (row.size() != numInputs)
+          {
+               throw std::runtime_error("Incorrect number of input features in row");
+          }
+
+          inputs.push_back(row);
+          outputs.push_back(outputVal);
+     }
+
+     return {inputs, outputs};
+}
+
+int train()
 {
      try
      {
           Model model;
 
-          // Add layers (dropout only after first layer)
-          model.add(10, Neuron::Activation::RELU);      // Input layer
-          model.add(10, Neuron::Activation::RELU, 0.2); // Hidden layer with dropout
-          model.add(1, Neuron::Activation::SIGMOID);    // Output layer
+          const std::string csvFilename = "../../Training/data.csv"; // Change to your CSV file path
+          const int numInputFeatures = 4;                            // Number of input features
+          const int outputColumn = 0;                                // -1 for last column, or specify column index
+          const int epochs = 2000;                                   // Training epochs
+          const double learningRate = 0.0001;                        // Learning rate
+
+          // Best architecture for your financial data
+          model.add(32, Neuron::Activation::RELU);  // First hidden layer
+          model.add(16, Neuron::Activation::RELU);  // Second hidden layer
+          model.add(8, Neuron::Activation::RELU);   // Third hidden layer
+          model.add(1, Neuron::Activation::LINEAR); // Output layer (predicting Close price)
 
           // Build the network
-          model.build(4);
+          model.build(numInputFeatures);
 
-          // Define sample input and output data
-          std::vector<std::vector<double>> inputs = {
-              {1.0f, 2.0f, 3.0f, 4.0f},
-              {2.0f, 3.0f, 4.0f, 5.0f},
-              {3.0f, 4.0f, 5.0f, 6.0f},
-              {4.0f, 5.0f, 6.0f, 7.0f}};
+          // Load data from CSV
+          auto [inputs, outputs] = readCSV(csvFilename, numInputFeatures, outputColumn);
 
-          std::vector<double> outputs = {
-              10.0f,
-              14.0f,
-              18.0f,
-              22.0f};
+          if (inputs.empty() || outputs.empty())
+          {
+               throw std::runtime_error("No data loaded from CSV file");
+          }
+
+          std::cout << "Loaded " << inputs.size() << " samples from CSV file\n";
 
           // Train the model
-          model.train(inputs, outputs, 2000, 3.6f);
+          model.train(inputs, outputs, epochs, learningRate);
 
-          // Run a prediction
-          std::vector<double> testInput = {5.0f, 6.0f, 7.0f, 8.0f};
-          std::vector<double> prediction = model.predict(testInput);
+          // Save the model
+          model.save("model.csv");
 
-          std::vector<double> testInput2 = {0, 0, 0, 0};
-          std::vector<double> prediction2 = model.predict(testInput2);
-
-          std::cout << "Prediction: ";
-          for (double val : prediction)
-               std::cout << val << " ";
-          std::cout << "\n";
-
-          std::cout << "Prediction2: ";
-          for (double val : prediction2)
-               std::cout << val << " ";
-          std::cout << "\n";
+          // Test the model with some samples from the training data
+          std::cout << "\nTesting with some samples:\n";
+          for (size_t i = 0; i < std::min(inputs.size(), static_cast<size_t>(5)); i++)
+          {
+               auto prediction = model.predict(inputs[i]);
+               std::cout << "Input: ";
+               for (double val : inputs[i])
+               {
+                    std::cout << val << " ";
+               }
+               std::cout << "| True: " << outputs[i] << " | Predicted: " << prediction[0] << "\n";
+          }
      }
      catch (const std::exception &e)
      {
           std::cerr << "Error: " << e.what() << "\n";
+          return 1;
      }
 
+     return 0;
+}
+
+int test()
+{
+     try
+     {
+          const std::string csvFilename = "../../Training/data.csv"; // Change to your CSV file path
+          const int numInputFeatures = 4;                            // Number of input features
+          const int outputColumn = 0;                                // -1 for last column, or specify column index
+
+          // Load data from CSV
+          auto [inputs, outputs] = readCSV(csvFilename, numInputFeatures, outputColumn);
+
+          Model model;
+          std::cout << "model loading" << "\n";
+          model.load("../../model.csv");
+
+          // Test the model with some samples from the training data
+          std::cout << "\nTesting with some samples:\n";
+          for (size_t i = 0; i < std::min(inputs.size(), static_cast<size_t>(5)); i++)
+          {
+               auto prediction = model.predict(inputs[i]);
+               std::cout << "Input: ";
+               for (double val : inputs[i])
+               {
+                    std::cout << val << " ";
+               }
+               std::cout << "| True: " << outputs[i] << " | Predicted: " << prediction[0] << "\n";
+          }
+     }
+     catch (const std::exception &e)
+     {
+          std::cerr << "Error: " << e.what() << "\n";
+          return 1;
+     }
+
+     return 0;
+}
+
+int main()
+{
+     // train();
+     test();
      return 0;
 }

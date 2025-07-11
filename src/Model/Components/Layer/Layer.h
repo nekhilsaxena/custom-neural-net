@@ -19,7 +19,7 @@ public:
      virtual std::vector<double> forward(const std::vector<double> &inputs) = 0;
 
      // Backward pass
-     virtual std::vector<double> backward(const std::vector<double> &gradients)
+     virtual std::vector<double> backward(const std::vector<double> &gradients, const std::vector<std::vector<double>> &nextLayerWeights = {})
      {
           return gradients;
      }

@@ -76,8 +76,6 @@ struct Cost
      }
 };
 
-std::vector<std::vector<double>> readCSV(const std::string &filename);
-std::vector<std::vector<std::string>> readRawCSV(const std::string &filename);
 StatsSummary computeStatistics(const std::vector<float> &data);
 
 #endif

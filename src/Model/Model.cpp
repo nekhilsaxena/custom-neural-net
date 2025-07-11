@@ -1,4 +1,5 @@
 #include "Model.h"
+// #include "./Network/Network.h"
 #include <iostream>
 #include <fstream>
 
@@ -22,8 +23,7 @@ void Model::add(int units, Neuron::Activation::Type activation, double dropoutRa
          Network::LayerType::DENSE,
          units,
          activation,
-         0.0,  // No dropout for the dense layer itself
-         false // Will be set to true for last layer in build()
+         0.0 // No dropout for the dense layer itself
      });
 
      // Add dropout layer if specified (except for output layer)
@@ -32,8 +32,7 @@ void Model::add(int units, Neuron::Activation::Type activation, double dropoutRa
           layers.push_back({Network::LayerType::DROPOUT,
                             0,                          // Not used for dropout
                             Neuron::Activation::LINEAR, // Not used for dropout
-                            dropoutRate,
-                            false});
+                            dropoutRate});
      }
 }
 
@@ -53,17 +52,10 @@ void Model::build(int inputSize)
      }
 
      network = std::make_unique<Network>();
-     size_t currentInputSize = inputSize;
 
-     // Mark last dense layer as output layer
-     for (auto it = layers.rbegin(); it != layers.rend(); ++it)
-     {
-          if (it->type == Network::LayerType::DENSE)
-          {
-               it->isOutput = true;
-               break;
-          }
-     }
+     size_t currentInputSize = size_t(inputSize);
+
+     network->initialize(inputSize);
 
      // Create all layers in the network
      for (size_t i = 0; i < layers.size(); i++)
@@ -73,12 +65,12 @@ void Model::build(int inputSize)
           switch (config.type)
           {
           case Network::LayerType::DENSE:
+               std::cout << "Layer Size: " << config.units << "\n";
                network->add(
                    config.type,
                    config.units,
                    config.activation,
-                   0.0, // Dropout handled separately
-                   config.isOutput);
+                   0.0); // Not used
                currentInputSize = config.units;
                break;
 
@@ -87,9 +79,7 @@ void Model::build(int inputSize)
                    config.type,
                    0,                          // Not used
                    Neuron::Activation::LINEAR, // Not used
-                   config.dropoutRate,
-                   false);
-               // Input size remains the same
+                   config.dropoutRate);
                break;
           }
      }
@@ -137,11 +127,13 @@ std::vector<double> Model::predict(const std::vector<double> &input)
      }
      if (input.size() != network->getInputSize())
      {
+          std::cout << "Input Size Given: " << input.size() << "\n";
+          std::cout << "Input Size Expected: " << network->getInputSize() << "\n";
           throw std::invalid_argument("Input size mismatch");
      }
 
      network->setTrainingMode(false);
-     return network->forward(input);
+     return network->predict(input);
 }
 
 void Model::save(const std::string &filename)
@@ -161,8 +153,11 @@ void Model::load(const std::string &filename)
           throw std::runtime_error("Model already built, cannot load weights");
      }
 
-     // First build a dummy network to get architecture
-     build(1); // Temporary input size
-     network->loadWeights(filename);
+     network = std::make_unique<Network>(); // Create a new empty network
+
+     network->loadWeights(filename); // This will fully create and initialize all layers
+
+     built = true;
+
      std::cout << "Model loaded from " << filename << "\n";
 }

@@ -52,9 +52,8 @@ public:
      double output;     // After activation
      double lastOutput; // For backprop
      double delta;      // Backprop error
-     bool isOutputNeuron;
 
-     Neuron(int numInputs, bool isOutputNeuron, Activation::Type activation = Activation::RELU);
+     Neuron(int numInputs, Activation::Type activation = Activation::RELU);
 
      void setActivation(Activation::Type type);
 
@@ -73,6 +72,7 @@ public:
      // Backprop
      void computeOutputDelta(double target);
      void computeHiddenDelta(const std::vector<Neuron> &nextLayer, int index);
+     double activationDerivative(double output);
      void updateWeights(const std::vector<double> &inputs, double learningRate);
 
      // Save/load

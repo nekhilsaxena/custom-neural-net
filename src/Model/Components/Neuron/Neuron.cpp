@@ -9,8 +9,8 @@
 #include <random>
 
 // Constructor with Xavier/Glorot initialization
-Neuron::Neuron(int numInputs, bool isOutputNeuron, Activation::Type activation)
-    : isOutputNeuron(isOutputNeuron), activation_(activation)
+Neuron::Neuron(int numInputs, Activation::Type activation)
+    : activation_(activation)
 {
      double range = sqrt(6.0 / (numInputs + 1)); // Xavier/Glorot for ReLU
 
@@ -93,18 +93,15 @@ double Neuron::forward(const std::vector<double> &inputs)
 // Compute delta for output neuron
 void Neuron::computeOutputDelta(double target)
 {
-     if (isOutputNeuron)
+     if (activation_ == Activation::SIGMOID)
      {
-          if (activation_ == Activation::SIGMOID)
-          {
-               // For classification (using sigmoid)
-               delta = (output - target) * sigmoidDerivative(output);
-          }
-          else
-          {
-               // For regression (linear output)
-               delta = output - target;
-          }
+          // For classification (using sigmoid)
+          delta = (output - target) * sigmoidDerivative(output);
+     }
+     else
+     {
+          // For regression (linear output)
+          delta = output - target;
      }
 }
 
@@ -117,6 +114,21 @@ void Neuron::computeHiddenDelta(const std::vector<Neuron> &nextLayer, int index)
           sum += next.weights[index] * next.delta;
      }
      delta = sum * reluDerivative(output); // Use ReLU derivative for hidden layers
+}
+
+double Neuron::activationDerivative(double output)
+{
+     switch (activation_)
+     {
+     case Neuron::Activation::RELU:
+          return reluDerivative(output);
+     case Neuron::Activation::SIGMOID:
+          return sigmoidDerivative(output);
+     case Neuron::Activation::LINEAR:
+          return 1.0;
+     default:
+          throw std::runtime_error("Unsupported activation function");
+     }
 }
 
 // Update weights and bias

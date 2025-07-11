@@ -2,13 +2,14 @@
 #include <stdexcept>
 #include <random>
 
-Dropout::Dropout(double dropoutPercentage)
+Dropout::Dropout(double dropoutPercentage, int numInputs)
     : Layer(), // Base constructor
       dropoutRate(1.0 - dropoutPercentage),
       isTraining(true),
       generator(std::random_device{}()),
       distribution(0.0, 1.0)
 {
+     numNeurons = numInputs;
      isTrainable = false; // Dropout layers aren't trainable
 
      if (dropoutPercentage < 0.0 || dropoutPercentage >= 1.0)
@@ -55,7 +56,7 @@ std::vector<double> Dropout::forward(const std::vector<double> &inputs)
      return lastOutput;
 }
 
-std::vector<double> Dropout::backward(const std::vector<double> &gradients)
+std::vector<double> Dropout::backward(const std::vector<double> &gradients, const std::vector<std::vector<double>> &nextLayerWeights = {})
 {
      if (gradients.size() != lastInput.size())
      {

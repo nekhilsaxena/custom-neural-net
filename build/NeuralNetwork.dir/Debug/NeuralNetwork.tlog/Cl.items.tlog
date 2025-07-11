@@ -1,11 +1,7 @@
-C:\Nekhil\Projects\RobotArm\NeuralNetwork\src\Model\Components\Layer\Layer.cpp;C:\Nekhil\Projects\RobotArm\NeuralNetwork\build\NeuralNetwork.dir\Debug\Layer.obj
-C:\Nekhil\Projects\RobotArm\NeuralNetwork\src\Model\Components\Network\Network.cpp;C:\Nekhil\Projects\RobotArm\NeuralNetwork\build\NeuralNetwork.dir\Debug\Network.obj
-C:\Nekhil\Projects\RobotArm\NeuralNetwork\src\Model\Components\Neuron\Neuron.cpp;C:\Nekhil\Projects\RobotArm\NeuralNetwork\build\NeuralNetwork.dir\Debug\Neuron.obj
-C:\Nekhil\Projects\RobotArm\NeuralNetwork\src\Model\Operations\create.cpp;C:\Nekhil\Projects\RobotArm\NeuralNetwork\build\NeuralNetwork.dir\Debug\create.obj
-C:\Nekhil\Projects\RobotArm\NeuralNetwork\src\Model\Operations\run.cpp;C:\Nekhil\Projects\RobotArm\NeuralNetwork\build\NeuralNetwork.dir\Debug\run.obj
-C:\Nekhil\Projects\RobotArm\NeuralNetwork\src\Model\Utils\Cost.cpp;C:\Nekhil\Projects\RobotArm\NeuralNetwork\build\NeuralNetwork.dir\Debug\Cost.obj
-C:\Nekhil\Projects\RobotArm\NeuralNetwork\src\Model\Utils\ReadCSV.cpp;C:\Nekhil\Projects\RobotArm\NeuralNetwork\build\NeuralNetwork.dir\Debug\ReadCSV.obj
-C:\Nekhil\Projects\RobotArm\NeuralNetwork\src\Model\Utils\ReadRawCSV.cpp;C:\Nekhil\Projects\RobotArm\NeuralNetwork\build\NeuralNetwork.dir\Debug\ReadRawCSV.obj
-C:\Nekhil\Projects\RobotArm\NeuralNetwork\src\Model\Utils\computeStatistics.cpp;C:\Nekhil\Projects\RobotArm\NeuralNetwork\build\NeuralNetwork.dir\Debug\computeStatistics.obj
-C:\Nekhil\Projects\RobotArm\NeuralNetwork\src\Model\Visualization\Visualization.cpp;C:\Nekhil\Projects\RobotArm\NeuralNetwork\build\NeuralNetwork.dir\Debug\Visualization.obj
 C:\Nekhil\Projects\RobotArm\NeuralNetwork\src\main.cpp;C:\Nekhil\Projects\RobotArm\NeuralNetwork\build\NeuralNetwork.dir\Debug\main.obj
+C:\Nekhil\Projects\RobotArm\NeuralNetwork\src\Model\Model.cpp;C:\Nekhil\Projects\RobotArm\NeuralNetwork\build\NeuralNetwork.dir\Debug\Model.obj
+C:\Nekhil\Projects\RobotArm\NeuralNetwork\src\Model\Components\Network\Network.cpp;C:\Nekhil\Projects\RobotArm\NeuralNetwork\build\NeuralNetwork.dir\Debug\Network.obj
+C:\Nekhil\Projects\RobotArm\NeuralNetwork\src\Model\Components\Layer\Dense\Dense.cpp;C:\Nekhil\Projects\RobotArm\NeuralNetwork\build\NeuralNetwork.dir\Debug\Dense.obj
+C:\Nekhil\Projects\RobotArm\NeuralNetwork\src\Model\Components\Layer\Dropout\Dropout.cpp;C:\Nekhil\Projects\RobotArm\NeuralNetwork\build\NeuralNetwork.dir\Debug\Dropout.obj
+C:\Nekhil\Projects\RobotArm\NeuralNetwork\src\Model\Components\Network\NetworkUtils.cpp;C:\Nekhil\Projects\RobotArm\NeuralNetwork\build\NeuralNetwork.dir\Debug\NetworkUtils.obj
+C:\Nekhil\Projects\RobotArm\NeuralNetwork\src\Model\Components\Neuron\Neuron.cpp;C:\Nekhil\Projects\RobotArm\NeuralNetwork\build\NeuralNetwork.dir\Debug\Neuron.obj

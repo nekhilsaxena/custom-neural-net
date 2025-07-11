@@ -19,18 +19,21 @@ public:
      };
 
 private:
+     std::vector<double> inputMeans;
+     std::vector<double> inputStddevs;
      std::vector<std::unique_ptr<Layer>> layers;
-     size_t nextLayerInputSize = 0; // Tracks input size for next layer
+     size_t input_dim = 0;
 
 public:
      Network() = default;
+
+     void initialize(int inputSize);
 
      // Add layer interface
      void add(LayerType type,
               int neuronCount = 0,
               Neuron::Activation::Type activation = Neuron::Activation::RELU,
-              double dropoutRate = 0.0,
-              bool isOutputLayer = false);
+              double dropoutRate = 0.0);
 
      // Network operations
      std::vector<double> forward(const std::vector<double> &inputs);
@@ -41,6 +44,8 @@ public:
                 bool verbose = false,
                 std::function<void(float, float)> onEpochEnd = nullptr);
 
+     std::vector<double> predict(std::vector<double> input);
+
      // Serialization
      void saveWeights(const std::string &filename);
      void loadWeights(const std::string &filename);
@@ -48,8 +53,12 @@ public:
      // Mode control
      void setTrainingMode(bool training);
 
+     std::vector<std::vector<double>> normalizeInputs(const std::vector<std::vector<double>> &inputs, std::vector<double> &means, std::vector<double> &stddevs) const;
+
+     std::vector<double> normalizeInput(std::vector<double> inputs);
+
      // Getters
-     size_t getInputSize() const { return layers.empty() ? 0 : layers.front()->getInputSize(); }
+     size_t getInputSize() const { return input_dim; }
      size_t getOutputSize() const { return layers.empty() ? 0 : layers.back()->getOutputSize(); }
 };
 

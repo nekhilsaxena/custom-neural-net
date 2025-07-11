@@ -6,12 +6,20 @@
 #include <functional>
 #include <memory>
 
+void Network::initialize(int inputSize)
+{
+     input_dim = size_t(inputSize);
+}
+
 void Network::add(LayerType type,
                   int neuronCount,
                   Neuron::Activation::Type activation,
-                  double dropoutRate,
-                  bool isOutputLayer)
+                  double dropoutRate)
 {
+     int layerInputs = layers.empty() ? input_dim : layers.back()->getOutputSize();
+
+     std::cout << "Layer Inputs: " << layerInputs << "\n";
+
      switch (type)
      {
      case LayerType::DENSE:
@@ -20,16 +28,11 @@ void Network::add(LayerType type,
           {
                throw std::invalid_argument("Dense layer must have positive neuron count");
           }
-          if (nextLayerInputSize == 0 && !layers.empty())
-          {
-               nextLayerInputSize = layers.back()->getOutputSize();
-          }
+
           layers.push_back(std::make_unique<Dense>(
               neuronCount,
-              nextLayerInputSize,
-              activation,
-              isOutputLayer));
-          nextLayerInputSize = neuronCount;
+              layerInputs,
+              activation));
           break;
      }
      case LayerType::DROPOUT:
@@ -42,8 +45,7 @@ void Network::add(LayerType type,
           {
                throw std::logic_error("Cannot add dropout layer as first layer");
           }
-          layers.push_back(std::make_unique<Dropout>(dropoutRate));
-          // Input size remains the same for next layer
+          layers.push_back(std::make_unique<Dropout>(dropoutRate, layerInputs));
           break;
      }
      default:
@@ -54,81 +56,12 @@ void Network::add(LayerType type,
 std::vector<double> Network::forward(const std::vector<double> &inputs)
 {
      std::vector<double> result = inputs;
-
      for (auto &layer : layers)
      {
           result = layer->forward(result);
      }
 
      return result;
-}
-
-void Network::saveWeights(const std::string &filename)
-{
-     std::ofstream file(filename);
-     if (!file.is_open())
-     {
-          throw std::runtime_error("Unable to open file to save weights.");
-     }
-
-     // Save network architecture first
-     file << "Network Architecture:\n";
-     for (const auto &layer : layers)
-     {
-          file << layer->getType() << " "
-               << layer->getInputSize() << " "
-               << layer->getOutputSize() << "\n";
-     }
-     file << "Weights:\n";
-
-     // Save weights for trainable layers
-     for (size_t layerIdx = 0; layerIdx < layers.size(); ++layerIdx)
-     {
-          if (layers[layerIdx]->isTrainableLayer())
-          {
-               layers[layerIdx]->save(file);
-          }
-     }
-}
-
-void Network::loadWeights(const std::string &filename)
-{
-     std::ifstream file(filename);
-     if (!file)
-     {
-          throw std::runtime_error("Failed to open weights file: " + filename);
-     }
-
-     std::string line;
-     bool readingWeights = false;
-     size_t layerIdx = 0;
-
-     while (std::getline(file, line))
-     {
-          if (line.empty())
-               continue;
-
-          if (line == "Weights:")
-          {
-               readingWeights = true;
-               continue;
-          }
-
-          if (!readingWeights)
-               continue; // Skip architecture info for now
-
-          // Only load weights for trainable layers
-          while (layerIdx < layers.size() && !layers[layerIdx]->isTrainableLayer())
-          {
-               layerIdx++;
-          }
-
-          if (layerIdx < layers.size())
-          {
-               layers[layerIdx]->load(file);
-               layerIdx++;
-          }
-     }
 }
 
 void Network::backward(const std::vector<double> &expected, double learningRate)
@@ -139,16 +72,34 @@ void Network::backward(const std::vector<double> &expected, double learningRate)
      // Start with output gradient
      std::vector<double> gradient = expected;
 
+     // Prepare a vector to store next layer weights for each backward pass
+     std::vector<std::vector<double>> nextLayerWeights;
+
      // Backward pass through layers in reverse order
      for (int i = layers.size() - 1; i >= 0; --i)
      {
           if (layers[i]->isTrainableLayer())
           {
-               gradient = layers[i]->backward(gradient);
+               // For trainable layers (like Dense)
+               if (i == layers.size() - 1)
+               {
+                    // Output layer case - no next layer weights needed
+                    gradient = layers[i]->backward(gradient);
+               }
+               else
+               {
+                    // Hidden layer case - pass next layer's weights
+                    auto *nextLayer = dynamic_cast<Dense *>(layers[i + 1].get());
+                    if (nextLayer)
+                    {
+                         nextLayerWeights = nextLayer->getWeightsMatrix();
+                    }
+                    gradient = layers[i]->backward(gradient, nextLayerWeights);
+               }
           }
           else
           {
-               // For non-trainable layers like dropout, just pass through
+               // For non-trainable layers (like Dropout)
                gradient = layers[i]->backward(gradient);
           }
      }
@@ -168,51 +119,78 @@ void Network::train(const std::vector<std::vector<double>> &inputs,
                     int epochs, double learningRate, bool verbose,
                     std::function<void(float, float)> onEpochEnd)
 {
+     // 1. Input validation
+     if (inputs.empty() || targets.empty())
+     {
+          throw std::invalid_argument("Inputs and targets cannot be empty");
+     }
      if (inputs.size() != targets.size())
      {
-          throw std::invalid_argument("Number of input samples must match number of target samples.");
+          throw std::invalid_argument("Inputs and targets size mismatch");
      }
 
+     // 2. Input normalization (per feature)
+     std::vector<double> means, stddevs;
+     auto normalizedInputs = normalizeInputs(inputs, means, stddevs);
+
+     // Store normalization parameters for later use (e.g., in predict)
+     inputMeans = means;
+     inputStddevs = stddevs;
+
+     // 3. Training loop with learning rate decay
      for (int epoch = 0; epoch < epochs; ++epoch)
      {
           double totalCost = 0.0;
-
-          for (size_t i = 0; i < inputs.size(); ++i)
+          double currentLearningRate = learningRate * (1.0 / (1.0 + 0.01 * epoch)); // Simple decay
+          std::vector<double> prediction;
+          for (size_t i = 0; i < normalizedInputs.size(); ++i)
           {
                // Forward pass
-               std::vector<double> prediction = forward(inputs[i]);
+               prediction = forward(normalizedInputs[i]);
 
                // Compute loss
+               double sampleCost = 0.0;
                for (size_t j = 0; j < prediction.size(); ++j)
                {
                     double error = prediction[j] - targets[i][j];
-                    totalCost += error * error;
+                    sampleCost += error * error;
                }
+               totalCost += sampleCost;
 
                // Backward pass
-               backward(targets[i], learningRate);
+               backward(targets[i], currentLearningRate);
           }
 
-          double averageCost = totalCost / inputs.size();
+          // Reporting
+          double averageCost = totalCost / normalizedInputs.size();
           if (verbose)
           {
-               std::cout << "Epoch " << epoch + 1 << ", Cost: " << averageCost << "\n";
+               std::cout << "Epoch " << epoch + 1
+                         << ", Cost: " << averageCost
+                         << ", LR: " << currentLearningRate
+                         << ", Final Prediction: " << (prediction.empty() ? 0.0 : prediction[0])
+                         << "\n";
           }
 
           if (onEpochEnd)
           {
                onEpochEnd(epoch, float(averageCost));
           }
+
+          // Optional early stopping
+          if (averageCost < 0.001)
+          {
+               if (verbose)
+                    std::cout << "Early stopping at epoch " << epoch + 1 << "\n";
+               break;
+          }
      }
 }
 
-void Network::setTrainingMode(bool training)
+std::vector<double> Network::predict(std::vector<double> input)
 {
-     for (auto &layer : layers)
-     {
-          if (auto dropout = dynamic_cast<Dropout *>(layer.get()))
-          {
-               dropout->setTraining(training);
-          }
-     }
+     std::vector<double> normalizedInput = this->normalizeInput(input);
+     std::vector<double> output = this->forward(normalizedInput);
+
+     return output;
 }
