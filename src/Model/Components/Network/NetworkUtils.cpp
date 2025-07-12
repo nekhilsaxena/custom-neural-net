@@ -14,19 +14,9 @@ void Network::saveWeights(const std::string &filename)
           throw std::runtime_error("Unable to open file to save weights.");
      }
 
-     // Save network architecture first
-     file << "Network Architecture:\n";
-     for (const auto &layer : layers)
-     {
-          file << layer->getType() << " "
-               << layer->getInputSize() << " "
-               << layer->getOutputSize() << "\n";
-     }
-
      // Save normalization stats
      file << "Normalization:\n";
 
-     // Save means
      file << "Means ";
      for (const auto &mean : inputMeans)
      {
@@ -34,7 +24,6 @@ void Network::saveWeights(const std::string &filename)
      }
      file << "\n";
 
-     // Save stddevs
      file << "Stddevs ";
      for (const auto &stddev : inputStddevs)
      {
@@ -42,14 +31,17 @@ void Network::saveWeights(const std::string &filename)
      }
      file << "\n";
 
+     // Save layer weights and configurations
      file << "Weights:\n";
-
-     // Save weights for trainable layers
-     for (size_t layerIdx = 0; layerIdx < layers.size(); ++layerIdx)
+     for (const auto &layer : layers)
      {
-          if (layers[layerIdx]->isTrainableLayer())
+          if (layer->getType() == "Dense" || layer->getType() == "Dropout")
           {
-               layers[layerIdx]->save(file);
+               layer->save(file);
+          }
+          else
+          {
+               throw std::runtime_error("Unknown layer type during save: " + layer->getType());
           }
      }
 }
@@ -124,9 +116,19 @@ void Network::loadWeights(const std::string &filename)
                }
 
                auto dense = std::make_unique<Dense>(numNeurons, numInputs, Neuron::Activation::RELU);
-
                dense->load(file);
                layers.push_back(std::move(dense));
+          }
+          else if (layerType == "Dropout")
+          {
+               float dropoutRate;
+               iss >> dropoutRate;
+
+               int prevOutputSize = layers.empty() ? 0 : layers.back()->getOutputSize();
+               auto dropout = std::make_unique<Dropout>(dropoutRate, prevOutputSize);
+
+               layers.push_back(std::move(dropout));
+               std::cout << "dropout layer added \n";
           }
           else
           {

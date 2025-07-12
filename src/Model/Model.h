@@ -12,9 +12,8 @@ public:
      Model() = default;
 
      // Add a dense layer with optional dropout
-     void add(int units,
-              Neuron::Activation::Type activation = Neuron::Activation::RELU,
-              double dropoutRate = 0.0);
+     void add(int neurons, Neuron::Activation::Type activation = Neuron::Activation::RELU);
+     void add(double dropoutRate);
 
      // Build the network with input shape
      void build(int inputSize);
@@ -33,7 +32,7 @@ private:
      struct LayerConfig
      {
           Network::LayerType type;
-          int units;
+          int neurons;
           Neuron::Activation::Type activation;
           double dropoutRate;
      };

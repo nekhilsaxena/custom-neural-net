@@ -1,9 +1,8 @@
 #include "Model.h"
-// #include "./Network/Network.h"
 #include <iostream>
 #include <fstream>
 
-void Model::add(int units, Neuron::Activation::Type activation, double dropoutRate)
+void Model::add(int units, Neuron::Activation::Type activation)
 {
      if (built)
      {
@@ -13,10 +12,6 @@ void Model::add(int units, Neuron::Activation::Type activation, double dropoutRa
      {
           throw std::invalid_argument("Number of units must be positive");
      }
-     if (dropoutRate < 0 || dropoutRate >= 1)
-     {
-          throw std::invalid_argument("Dropout rate must be in [0, 1)");
-     }
 
      // Add main dense layer
      layers.push_back({
@@ -25,6 +20,14 @@ void Model::add(int units, Neuron::Activation::Type activation, double dropoutRa
          activation,
          0.0 // No dropout for the dense layer itself
      });
+}
+
+void Model::add(double dropoutRate)
+{
+     if (dropoutRate < 0 || dropoutRate >= 1)
+     {
+          throw std::invalid_argument("Dropout rate must be in [0, 1)");
+     }
 
      // Add dropout layer if specified (except for output layer)
      if (dropoutRate > 0)
@@ -65,13 +68,13 @@ void Model::build(int inputSize)
           switch (config.type)
           {
           case Network::LayerType::DENSE:
-               std::cout << "Layer Size: " << config.units << "\n";
+               std::cout << "Layer Size: " << config.neurons << "\n";
                network->add(
                    config.type,
-                   config.units,
+                   config.neurons,
                    config.activation,
                    0.0); // Not used
-               currentInputSize = config.units;
+               currentInputSize = config.neurons;
                break;
 
           case Network::LayerType::DROPOUT:

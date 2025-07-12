@@ -90,12 +90,14 @@ int train()
           const std::string csvFilename = "../../Training/data.csv"; // Change to your CSV file path
           const int numInputFeatures = 4;                            // Number of input features
           const int outputColumn = 0;                                // -1 for last column, or specify column index
-          const int epochs = 2000;                                   // Training epochs
+          const int epochs = 10;                                     // Training epochs
           const double learningRate = 0.0001;                        // Learning rate
 
           // Best architecture for your financial data
-          model.add(32, Neuron::Activation::RELU);  // First hidden layer
-          model.add(16, Neuron::Activation::RELU);  // Second hidden layer
+          model.add(32, Neuron::Activation::RELU);  // Dense layer
+          model.add(0.2);                           // Dropout layer
+          model.add(16, Neuron::Activation::RELU);  // Dense layer
+          model.add(0.3);                           // Dropout layer
           model.add(8, Neuron::Activation::RELU);   // Third hidden layer
           model.add(1, Neuron::Activation::LINEAR); // Output layer (predicting Close price)
 
@@ -116,7 +118,7 @@ int train()
           model.train(inputs, outputs, epochs, learningRate);
 
           // Save the model
-          model.save("model.csv");
+          model.save("model2.csv");
 
           // Test the model with some samples from the training data
           std::cout << "\nTesting with some samples:\n";
@@ -180,6 +182,6 @@ int test()
 int main()
 {
      // train();
-     test();
+     // test();
      return 0;
 }

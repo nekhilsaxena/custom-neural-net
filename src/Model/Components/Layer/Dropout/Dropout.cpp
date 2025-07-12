@@ -1,6 +1,7 @@
 #include "Dropout.h"
 #include <stdexcept>
 #include <random>
+#include <iostream>
 
 Dropout::Dropout(double dropoutPercentage, int numInputs)
     : Layer(), // Base constructor
@@ -95,7 +96,7 @@ void Dropout::save(std::ofstream &file) const
      {
           throw std::runtime_error("Cannot save Dropout - file not open");
      }
-     file << getType() << " " << (1.0 - dropoutRate) << "\n";
+     file << "Dropout " << (1 - dropoutRate) << "\n";
 }
 
 void Dropout::load(std::ifstream &file)
@@ -115,4 +116,6 @@ void Dropout::load(std::ifstream &file)
      }
 
      dropoutRate = 1.0 - dropoutPercentage;
+
+     std::cout << "Dropout Layer Percentage: " << dropoutPercentage << "\n";
 }
