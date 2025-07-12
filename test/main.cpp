@@ -90,7 +90,7 @@ int train()
           const std::string csvFilename = "../../Training/data.csv"; // Change to your CSV file path
           const int numInputFeatures = 4;                            // Number of input features
           const int outputColumn = 0;                                // -1 for last column, or specify column index
-          const int epochs = 10;                                     // Training epochs
+          const int epochs = 2000;                                   // Training epochs
           const double learningRate = 0.0001;                        // Learning rate
 
           // Best architecture for your financial data
@@ -118,7 +118,7 @@ int train()
           model.train(inputs, outputs, epochs, learningRate);
 
           // Save the model
-          model.save("model2.csv");
+          model.save("model.csv");
 
           // Test the model with some samples from the training data
           std::cout << "\nTesting with some samples:\n";
@@ -181,7 +181,7 @@ int test()
 
 int main()
 {
-     // train();
+     train();
      // test();
      return 0;
 }
