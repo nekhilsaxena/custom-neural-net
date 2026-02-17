@@ -1,4 +1,4 @@
-# NeuralNetwork
+# custom-neural-network
 
 A C++ neural network project with example datasets, visualization tools, and native library integrations. This README documents repository structure, build instructions, usage examples, API overview, testing, CI suggestions, and contribution guidelines. The project includes ImGui-based visualization and vcpkg-managed native dependencies.
 
