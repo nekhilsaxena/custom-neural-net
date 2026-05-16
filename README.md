@@ -199,13 +199,4 @@ Third-party license texts are included in vendor or vcpkg metadata files.
 
 See LICENSE in the repository root for licensing terms. Some bundled third-party components carry their own licenses (e.g., MIT for nlohmann-json).
 
-## Next Steps / Suggestions
-
-I can add:
-- A curated "What I changed" section listing your exact modifications if you provide file names or diffs.
-- Detailed API docs generated from headers (I can produce a per-file doc set).
-- Automatic release notes and CI badge integration.
-
-Tell me which of the above you want next, and provide any specific file names or code snippets you want highlighted in the README.
-
 
